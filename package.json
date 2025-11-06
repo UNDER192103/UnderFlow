@@ -60,11 +60,13 @@
     "start",
     "biuld"
   ],
+  "devDependencies":{
+    "electron": "^39.1.0",
+    "electron-builder": "^26.0.12"
+  },
   "dependencies": {
     "auto-launch": "^5.0.6",
     "dotenv": "^17.2.3",
-    "electron": "^39.1.0",
-    "electron-builder": "^26.0.12",
     "electron-store": "^11.0.2",
     "electron-updater": "^6.6.2",
     "node-wav": "^0.0.2",
