@@ -1,0 +1,16 @@
+{
+  "name": "teste",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "electron": "^39.1.0",
+    "electron-store": "^11.0.2",
+    "node-wav": "^0.0.2",
+    "reconnecting-websocket": "^4.4.0",
+    "ws": "^8.18.3"
+  }
+}

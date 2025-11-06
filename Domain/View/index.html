@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title>UnderFlow</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #121212; /* Fundo bem escuro */
+            color: #e0e0e0; /* Texto claro */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh; /* Ocupa a altura total da viewport */
+            justify-content: center; /* Centraliza verticalmente */
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #1e1e1e; /* Container um pouco mais claro que o fundo */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Sombra escura */
+        }
+        h1 {
+            color: #007bff; /* Cor de destaque azul */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input[type="text"],
+        .input-group input[type="password"],
+        .input-group input[type="range"],
+        .to        .input-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #333; /* Borda escura */
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: #2c2c2c; /* Fundo do input escuro */
+            color: #e0e0e0; /* Texto do input claro */
+        }
+        .token-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .token-input-container input[type="text"] {
+            flex-grow: 1;
+            padding-right: 40px; /* Espaço para o ícone de olho */
+            position: relative;
+        }
+        .token-input-container .eye-icon {
+            position: absolute;
+            right: 15px;
+            cursor: pointer;
+            color: #adb5bd;
+            font-size: 1.2em;
+            top: 5px;
+            user-select: none;
+        }
+        .token-input-wrapper {
+            position: relative;
+            flex-grow: 1;
+        }
+        #saveTokenButton {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            white-space: nowrap;
+        }
+        #saveTokenButton:hover:not(:disabled) {
+            background-color: #0056b3;
+        }        .input-group input[type="range"] {
+            padding: 0;
+            height: 25px;
+        }
+        .toggle-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #2c2c2c;
+            border-radius: 5px;
+        }
+        .toggle-group label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #007bff;
+        }
+        input:focus + .slider {
+            box-shadow: 0 0 1px #007bff;
+        }
+        input:checked + .slider:before {
+            transform: translateX(16px);
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            color: #fff; /* Texto do botão claro */
+        }
+        #toggleVisualizer {
+            background-color: #5a6268;
+        }
+        #toggleVisualizer:hover {
+            background-color: #494f54;
+        }
+        #startButton, #stopButton {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        #startButton {
+            background-color: #28a745;
+        }
+        #startButton:hover:not(:disabled) {
+            background-color: #218838;
+        }
+        #stopButton {
+            background-color: #dc3545;
+        }
+        #stopButton:hover:not(:disabled) {
+            background-color: #c82333;
+        }
+        #restartButton {
+            background-color: #ffc107;
+            color: #1e1e1e; /* Texto escuro para contraste */
+        }
+        #restartButton:hover:not(:disabled) {
+            background-color: #e0a800;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        #status, #connectionStatus {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        #status {
+            background-color: #343a40; /* Fundo escuro para status */
+            color: #adb5bd; /* Texto cinza claro */
+        }
+        #connectionStatus {
+            background-color: #6c757d; /* Fundo cinza para status de conexão */
+            color: #fff;
+        }
+        #visualizer {
+            display: block;
+            margin-top: 20px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: #2c2c2c; /* Fundo do visualizador escuro */
+            width: 100%; /* Largura total do container */
+            height: 100px; /* Mantendo a altura padrão */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>UnderFlow</h1>
+
+        <div class="input-group">
+            <label for="tokenInput">Token de Acesso:</label>
+            <div class="token-input-container">
+                <div class="token-input-wrapper">
+                    <input type="password" id="tokenInput" placeholder="Insira seu token de acesso aqui">
+                    <span class="eye-icon" id="toggleTokenVisibility">👁️</span>
+                </div>
+                <button id="saveTokenButton">Salvar</button>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="volumeControl">Volume de Saída: <span id="volumeValue">100%</span></label>
+            <input type="range" id="volumeControl" min="0" max="200" value="100" step="1">
+        </div>
+
+        <div class="toggle-group">
+            <label for="autoStartWindows">Iniciar com Windows</label>
+            <label class="switch">
+                <input type="checkbox" id="autoStartWindows">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="toggle-group">
+            <label for="autoStartStream">Iniciar Transmissão Automaticamente</label>
+            <label class="switch">
+                <input type="checkbox" id="autoStartStream">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="button-group">
+            <button id="startButton">Iniciar Captura</button>
+            <button id="stopButton" disabled>Parar Captura</button>
+        </div>
+
+        <div class="button-group">
+            <button id="restartButton">Reiniciar Audio Streamer</button>
+            <button id="toggleVisualizer">Ocultar Visualizador</button>
+        </div>
+
+        <div id="status">Aguardando...</div>
+        <div id="connectionStatus">Desconectado</div>
+
+        <canvas id="visualizer"></canvas>
+    </div>
+
+    <script src="./ui.js"></script>
+</body>
+</html>
