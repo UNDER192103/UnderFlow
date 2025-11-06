@@ -10,7 +10,7 @@ class WebSocketManager {
     }
 
     connect() {
-        this.ws = new ReconnectingWebSocket(process.env.WS_URL, [], { WebSocket: WebSocket });
+        this.ws = new ReconnectingWebSocket('wss://raservice.undernouzen.shop', [], { WebSocket: WebSocket });
 
         this.ws.addEventListener('open', () => {
             if (this.onOpen) {
