@@ -1,18 +1,36 @@
-const { app, BrowserWindow, ipcMain, session, desktopCapturer } = require('electron');
+const { app, BrowserWindow, ipcMain, session, desktopCapturer, Tray, Menu } = require('electron');
+const AutoLaunch = require('auto-launch');
 const path = require('path');
 const Store = require('electron-store');
-const WebSocketManager = require('../Domain/Service/WebSocket'); // Importa o serviço WebSocket
-
 const store = new Store.default();
+const WebSocketManager = require('../Domain/Service/WebSocket');
+const { autoUpdater } = require("electron-updater");
+var autoLaunch = new AutoLaunch({ name: app.getName(), path: app.getPath('exe') });
+autoLaunch.isEnabled().then(isEnabled => {
+    if (!isEnabled) {
+        if (store.get('autoStartWindows', false)) autoLaunch.enable(); else autoLaunch.disable();
+    }
+    else {
+        if (store.get('autoStartWindows', false)) autoLaunch.enable();
+    }
+});
+
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = false;
 
 let mainWindow;
 let backgroundWindow;
 let wsManager; // Instância do WebSocketManager
+let APP_ICON;
 
 function createMainWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 750,
+        frame: true,
+        title: app.getName(),
+        autoHideMenuBar: true,
+        icon: path.join(app.getAppPath(), 'Domain', 'src', 'img', 'UFx256.ico'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
@@ -33,6 +51,20 @@ function createMainWindow() {
         if (wsManager) {
             wsManager.close();
         }
+    });
+
+    APP_ICON.on('double-click', function (e) {
+        if (mainWindow.isVisible()) {
+            mainWindow.hide();
+        } else {
+            mainWindow.show();
+            mainWindow.maximize();
+        }
+    });
+
+    mainWindow.on('minimize', function (event) {
+        event.preventDefault();
+        mainWindow.hide();
     });
 }
 
@@ -69,7 +101,7 @@ function setupWebSocket() {
     };
 
     wsManager.onMessage = (data) => {
-        if(data === 'token'){
+        if (data === 'token') {
             wsManager.send(JSON.stringify({ type: 'token', token: store.get('token') }));
         }
     }
@@ -88,7 +120,12 @@ function setupWebSocket() {
     wsManager.connect();
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+    const isRunning = app.requestSingleInstanceLock();
+    if (!isRunning) {
+        return app.quit();
+    }
+
     session.defaultSession.setDisplayMediaRequestHandler(async (request, callback) => {
         try {
             const sources = await desktopCapturer.getSources({ types: ['screen'] });
@@ -101,10 +138,13 @@ app.whenReady().then(() => {
             callback({ video: null, audio: 'none' });
         }
     });
+    APP_ICON = new Tray(path.join(app.getAppPath(), 'Domain', 'src', 'img', 'UFx256.ico'));
 
+    setContextMenu();
     createMainWindow();
     createBackgroundWindow();
     setupWebSocket(); // Configura e inicia o WebSocket
+    startAllServicesAutoUpdater();
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
@@ -158,7 +198,7 @@ ipcMain.on('set-setting', (event, key, value) => {
     store.set(key, value);
     // Se o token for atualizado, envie para a janela de áudio imediatamente
     if (key === 'token' && backgroundWindow) {
-        if(wsManager.ws.readyState === wsManager.ws.OPEN){
+        if (wsManager.ws.readyState === wsManager.ws.OPEN) {
             wsManager.send(JSON.stringify({ type: 'token', token: value }));
         }
         backgroundWindow.webContents.send('set-token', value);
@@ -217,3 +257,72 @@ ipcMain.on('visualizer-data', (event, data) => {
         mainWindow.webContents.send('visualizer-data', data);
     }
 });
+
+function setContextMenu() {
+    var contextMenu = Menu.buildFromTemplate([
+        {
+            label: app.getName(), type: 'normal', click: () => {
+                mainWindow.show();
+                mainWindow.maximize();
+            }
+        },
+        { type: 'separator' },
+        {
+            label: "Reiniciar Aplicativo", type: 'normal', click: () => {
+                app.relaunch();
+                app.exit();
+            }
+        },
+        {
+            label: "Atualizar Tela", type: 'normal', click: () => {
+                mainWindow.show();
+                mainWindow.maximize();
+                mainWindow.reload();
+            }
+        },
+        {
+            label: "Sair", type: 'normal', click: async () => {
+                app.quit();
+            }
+        }
+    ]);
+
+    APP_ICON.setToolTip(app.getName());
+    APP_ICON.setContextMenu(contextMenu);
+}
+
+function startAllServicesAutoUpdater() {
+    ///////   Updater   ///////
+
+    autoUpdater.on("update-available", (info) => {
+
+    });
+
+    autoUpdater.on('download-progress', (info) => {
+
+    });
+
+    autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName) => {
+        setTimeout(() => {
+            mainWindow.close();
+            backgroundWindow.close();
+            app.quit();
+            autoUpdater.quitAndInstall(false, true);
+        }, 5000);
+    });
+
+    autoUpdater.on("update-not-available", (info) => { ///Not update
+
+    });
+
+    autoUpdater.on("error", async info => { ///Error
+
+    });
+
+    try {
+        autoUpdater.checkForUpdates();
+    } catch (error) {
+        console.log(error);
+    }
+    ///////   Updater   ///////
+}

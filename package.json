@@ -1,14 +1,72 @@
 {
-  "name": "teste",
-  "version": "1.0.0",
-  "main": "main.js",
+  "name": "under-flow",
+  "version": "1.0.1",
+  "description": "UnderFlow",
+  "productName": "UnderFlow",
+  "main": "index.js",
+  "status": "release",
   "scripts": {
-    "start": "electron ."
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win"
   },
+  "repository": "https://github.com/UNDER192103/UnderFlow",
+  "publish": {
+    "provider": "github",
+    "releaseType": "release"
+  },
+  "build": {
+    "electronVersion": "37.2.0",
+    "nodeGypRebuild": true,
+    "buildDependenciesFromSource": true,
+    "npmRebuild": true,
+    "asar": false,
+    "appId": "com.UNDER192103.underflow",
+    "productName": "UnderFlow",
+    "win": {
+      "target": "nsis",
+      "requestedExecutionLevel": "asInvoker",
+      "icon": "Domain/src/img/UFx256.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "installerIcon": "Domain/src/img/UFx256.ico",
+      "uninstallerIcon": "Domain/src/img/UFx256.ico",
+      "installerHeaderIcon": "Domain/src/img/UFx256.ico",
+      "license": "LICENSE.md",
+      "allowToChangeInstallationDirectory": true
+    },
+    "directories": {
+      "output": "build"
+    }
+  },
+  "homepage": "https://github.com/UNDER192103/UnderFlow",
+  "author": {
+    "name": "UNDER",
+    "email": "undernouzen@gmail.com",
+    "url": "https://github.com/UNDER192103"
+  },
+  "contributors": [
+    {
+      "name": "UNDER",
+      "email": "undernouzen@gmail.com",
+      "url": "https://github.com/UNDER192103"
+    }
+  ],
+  "license": "ISC",
+  "keywords": [
+    "Electron",
+    "start",
+    "biuld"
+  ],
   "dependencies": {
+    "auto-launch": "^5.0.6",
     "dotenv": "^17.2.3",
     "electron": "^39.1.0",
+    "electron-builder": "^26.0.12",
     "electron-store": "^11.0.2",
+    "electron-updater": "^6.6.2",
     "node-wav": "^0.0.2",
     "reconnecting-websocket": "^4.4.0",
     "ws": "^8.18.3"
