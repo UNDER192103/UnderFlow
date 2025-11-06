@@ -227,7 +227,7 @@ ipcMain.on('get-connection-status', (event) => {
             case wsManager.ws.OPEN:
                 statusMessage = 'Conectado';
                 break;
-            case wsManager.WebSocket.CONNECTING:
+            case wsManager.ws.CONNECTING:
                 statusMessage = 'Conectando...';
                 break;
             default:
